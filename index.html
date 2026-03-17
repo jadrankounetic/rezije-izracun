@@ -11,20 +11,27 @@ body{font-family:'Merriweather Sans',system-ui,sans-serif;background:#EFEAE2;col
 input:focus{border-color:#2980B9!important;outline:none}
 ::-webkit-scrollbar{height:4px;width:4px}
 ::-webkit-scrollbar-thumb{background:#DDD8CF;border-radius:4px}
+#loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:12px}
+.spin{width:28px;height:28px;border:3px solid #DDD8CF;border-top-color:#C0392B;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
 </style>
 </head>
 <body>
-<div id="root"></div>
+<div id="root"><div id="loading"><div class="spin"></div><div style="font-size:13px;color:#7F8C8D">Spajanje na bazu...</div></div></div>
+
 <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-<script>
-(function(){
-"use strict";
-var e=React.createElement,us=React.useState,um=React.useMemo,ue=React.useEffect,uc=React.useCallback;
 
-var SK="rezije-v6";
-function ld(){try{var r=localStorage.getItem(SK);return r?JSON.parse(r):null}catch(x){return null}}
-function sv(d){try{localStorage.setItem(SK,JSON.stringify(d))}catch(x){}}
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import{getDatabase,ref,set,onValue}from"https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+
+var firebaseConfig={databaseURL:"https://rezije-app-default-rtdb.europe-west1.firebasedatabase.app"};
+var app=initializeApp(firebaseConfig);
+var db=getDatabase(app);
+
+var e=React.createElement,us=React.useState,um=React.useMemo,ue=React.useEffect,uc=React.useCallback,ur=React.useRef;
 
 var defP={
 dubravko:{kwh_m3:11.441182,eur_kwh_p:0.0542,dist:0.0027,pdv_p:0.05,fix_p:3.05,c_kwh_s:0.142714,mjer:1.73,pdv_s:0.13,doi:0.982,voda:31.26,smece:12.75,kom:17.60,amis:0,ost:3.54,hrt:0},
@@ -61,65 +68,51 @@ var C={bg:"#EFEAE2",cd:"#FFF",ac:"#C0392B",bl:"#2980B9",bll:"#D4EAFC",blb:"#85C1
 function fmt(n){return n==null||isNaN(n)?"\u2014":n.toLocaleString("hr-HR",{minimumFractionDigits:2,maximumFractionDigits:2})+" \u20AC"}
 function f2(n){return Math.round(n*100)/100}
 
-// SVG Bar Chart component
 function BarChart(props){
-var data=props.data,W=props.width||340,H=props.height||200;
+var data=props.data,W=340,H=200;
 if(!data.length)return null;
 var mx=0;data.forEach(function(d){var t=d.plin+d.struja+d.fix;if(t>mx)mx=t});
 if(mx===0)mx=1;
-var pad={t:20,b:40,l:40,r:10};
-var cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
+var pad={t:20,b:40,l:40,r:10},cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
 var bw=Math.min(Math.floor(cw/data.length)*0.6,40);
 var gap=(cw-bw*data.length)/(data.length+1);
-
 var bars=data.map(function(d,i){
 var x=pad.l+gap+(bw+gap)*i;
 var hp=ch*(d.plin/mx),hs=ch*(d.struja/mx),hf=ch*(d.fix/mx);
 var yf=pad.t+ch-hf,ys=yf-hs,yp=ys-hp;
 return e('g',{key:i},
-e('rect',{x:x,y:yp,width:bw,height:hp,fill:C.pl,rx:0}),
-e('rect',{x:x,y:ys,width:bw,height:hs,fill:C.sr,rx:0}),
-e('rect',{x:x,y:yf,width:bw,height:hf,fill:C.gr,rx:0}),
+e('rect',{x:x,y:yp,width:bw,height:hp,fill:C.pl}),
+e('rect',{x:x,y:ys,width:bw,height:hs,fill:C.sr}),
+e('rect',{x:x,y:yf,width:bw,height:hf,fill:C.gr}),
 e('text',{x:x+bw/2,y:H-8,textAnchor:"middle",fontSize:8,fill:C.mu},d.label));});
-
 var lines=[];
 for(var i=0;i<=4;i++){
 var v=mx*i/4,y=pad.t+ch-ch*(v/mx);
 lines.push(e('line',{key:i,x1:pad.l,x2:W-pad.r,y1:y,y2:y,stroke:C.bo,strokeWidth:0.5,strokeDasharray:"3,3"}));
 lines.push(e('text',{key:"t"+i,x:pad.l-4,y:y+3,textAnchor:"end",fontSize:8,fill:C.mu},Math.round(v)));}
-
 return e('svg',{viewBox:"0 0 "+W+" "+H,style:{width:"100%",height:"auto"}},lines,bars,
 e('g',{transform:"translate("+(pad.l+10)+",12)"},
 e('rect',{x:0,y:0,width:8,height:8,fill:C.pl,rx:1}),e('text',{x:12,y:8,fontSize:8,fill:C.mu},"Plin"),
 e('rect',{x:45,y:0,width:8,height:8,fill:C.sr,rx:1}),e('text',{x:57,y:8,fontSize:8,fill:C.mu},"Struja"),
 e('rect',{x:100,y:0,width:8,height:8,fill:C.gr,rx:1}),e('text',{x:112,y:8,fontSize:8,fill:C.mu},"Fiksni")));}
 
-// SVG Line Chart
 function LineChart(props){
-var data=props.data,W=props.width||340,H=props.height||160;
+var data=props.data,W=340,H=160;
 if(data.length<2)return null;
 var vals=data.map(function(d){return d.value});
 var mn=Math.min.apply(null,vals)*0.9,mx=Math.max.apply(null,vals)*1.05;
 if(mx===mn)mx=mn+1;
-var pad={t:16,b:36,l:40,r:10};
-var cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
-
+var pad={t:16,b:36,l:40,r:10},cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
 var pts=data.map(function(d,i){
-var x=pad.l+cw*i/(data.length-1);
-var y=pad.t+ch-(ch*(d.value-mn)/(mx-mn));
-return{x:x,y:y,v:d.value,l:d.label};});
-
+return{x:pad.l+cw*i/(data.length-1),y:pad.t+ch-(ch*(d.value-mn)/(mx-mn)),v:d.value,l:d.label};});
 var pathD="M"+pts.map(function(p){return p.x+","+p.y}).join("L");
 var areaD=pathD+"L"+pts[pts.length-1].x+","+(pad.t+ch)+"L"+pts[0].x+","+(pad.t+ch)+"Z";
-
 var lines=[];
 for(var i=0;i<=3;i++){
 var v=mn+(mx-mn)*i/3,y=pad.t+ch-ch*((v-mn)/(mx-mn));
 lines.push(e('line',{key:i,x1:pad.l,x2:W-pad.r,y1:y,y2:y,stroke:C.bo,strokeWidth:0.5,strokeDasharray:"3,3"}));
 lines.push(e('text',{key:"t"+i,x:pad.l-4,y:y+3,textAnchor:"end",fontSize:8,fill:C.mu},Math.round(v)));}
-
-return e('svg',{viewBox:"0 0 "+W+" "+H,style:{width:"100%",height:"auto"}},
-lines,
+return e('svg',{viewBox:"0 0 "+W+" "+H,style:{width:"100%",height:"auto"}},lines,
 e('path',{d:areaD,fill:C.ac,opacity:0.12}),
 e('path',{d:pathD,fill:"none",stroke:C.ac,strokeWidth:2}),
 pts.map(function(p,i){return e('g',{key:i},e('circle',{cx:p.x,cy:p.y,r:3,fill:C.ac}),
@@ -142,29 +135,71 @@ style:{width:90,padding:"6px 8px",borderRadius:6,border:"1.5px solid "+C.blb,bac
 props.unit?e('span',{style:{fontSize:11,color:C.mu,width:30}},props.unit):null));}
 
 function App(){
-var ds=us(function(){return ld()||{entries:defE,params:defP}});
-var data=ds[0],setData=ds[1];
+var ds=us(null),data=ds[0],setData=ds[1];
+var ls=us(true),loading=ls[0],setLoading=ls[1];
+var cs=us(true),connected=cs[0],setCon=cs[1];
 var ps=us("dubravko"),person=ps[0],setPerson=ps[1];
 var vs=us("tablica"),view=vs[0],setView=vs[1];
 var ns=us({d:"",m:"",k:""}),nr=ns[0],setNr=ns[1];
 var ts=us(null),toast=ts[0],setToast=ts[1];
+var skipRef=ur(false);
 
-ue(function(){sv(data)},[data]);
+// Firebase: listen for changes
+ue(function(){
+var dbRef=ref(db,"rezije");
+var unsub=onValue(dbRef,function(snapshot){
+var val=snapshot.val();
+if(val){
+if(!skipRef.current){setData(val)}
+skipRef.current=false;
+}else{
+var init={entries:defE,params:defP};
+set(ref(db,"rezije"),init);
+setData(init);
+}
+setLoading(false);setCon(true);
+},function(err){
+console.error("Firebase error:",err);
+setCon(false);setLoading(false);
+var local=null;try{local=JSON.parse(localStorage.getItem("rezije-backup"))}catch(x){}
+if(!data)setData(local||{entries:defE,params:defP});
+});
+return function(){unsub()};
+},[]);
+
+// Save to Firebase when data changes
+function saveToFB(newData){
+skipRef.current=true;
+set(ref(db,"rezije"),newData);
+try{localStorage.setItem("rezije-backup",JSON.stringify(newData))}catch(x){}
+}
+
 var showT=uc(function(m){setToast(m);setTimeout(function(){setToast(null)},2000)},[]);
+
+if(loading||!data)return e('div',{id:"loading"},e('div',{className:"spin"}),e('div',{style:{fontSize:13,color:"#7F8C8D"}},"Spajanje na bazu..."));
 
 var ent=data.entries[person]||[];
 var par=data.params[person]||defP.dubravko;
 var res=um(function(){return calc(ent,par)},[ent,par]);
 
-var setE=function(fn){setData(function(d){var ne={};for(var k in d.entries)ne[k]=d.entries[k];ne[person]=fn(d.entries[person]);return{entries:ne,params:d.params}})};
-var setP=function(k,v){setData(function(d){var np={};for(var x in d.params)np[x]=d.params[x];var pp={};for(var y in d.params[person])pp[y]=d.params[person][y];pp[k]=v;np[person]=pp;return{entries:d.entries,params:np}})};
+var setE=function(fn){
+var ne={};for(var k in data.entries)ne[k]=data.entries[k];
+ne[person]=fn(data.entries[person]);
+var nd={entries:ne,params:data.params};
+setData(nd);saveToFB(nd);};
+var setP=function(k,v){
+var np={};for(var x in data.params)np[x]=data.params[x];
+var pp={};for(var y in data.params[person])pp[y]=data.params[person][y];
+pp[k]=v;np[person]=pp;
+var nd={entries:data.entries,params:np};
+setData(nd);saveToFB(nd);};
 
 function addRow(){
 if(!nr.d||!nr.m||!nr.k){showT("Popunite sva polja!");return}
 setE(function(a){return a.concat({id:Date.now(),d:nr.d,m:parseFloat(nr.m),k:parseFloat(nr.k)})});
 setNr({d:"",m:"",k:""});showT("Dodano \u2713");}
 function delRow(id){setE(function(a){return a.filter(function(x){return x.id!==id})});showT("Obrisano")}
-function resetAll(){if(window.confirm("Vratiti na pocetne podatke?")){setData({entries:defE,params:defP});showT("Resetirano")}}
+function resetAll(){if(window.confirm("Vratiti na pocetne podatke?")){var nd={entries:defE,params:defP};setData(nd);saveToFB(nd);showT("Resetirano")}}
 
 var stats=um(function(){
 if(!res.length)return{};var t=0,p=0,s=0;
@@ -173,7 +208,6 @@ return{total:t,avg:t/res.length,plin:p,struja:s}},[res]);
 
 var barData=res.map(function(r){return{label:r.date,plin:f2(r.pt),struja:f2(r.st),fix:f2(r.fx)}});
 var lineData=res.map(function(r){return{label:r.date,value:f2(r.uk)}});
-
 var nav=[{id:"tablica",l:"Tablica",i:"\u25A6"},{id:"unos",l:"Unos",i:"\u271A"},{id:"grafovi",l:"Grafovi",i:"\u25C9"},{id:"cijene",l:"Cijene",i:"\u2699"}];
 var ib={padding:"10px 12px",borderRadius:8,border:"1.5px solid "+C.bo,fontSize:14,fontFamily:"'Merriweather Sans'",outline:"none",background:"#fff",width:"100%",boxSizing:"border-box"};
 
@@ -185,8 +219,13 @@ return e('div',{style:{fontFamily:"'Merriweather Sans',sans-serif",background:C.
 
 toast?e('div',{style:{position:"fixed",top:16,left:"50%",transform:"translateX(-50%)",background:C.tx,color:"#fff",padding:"10px 24px",borderRadius:10,fontSize:13,fontWeight:700,zIndex:100,boxShadow:"0 8px 24px rgba(0,0,0,0.2)"}},toast):null,
 
+// Header
 e('div',{style:{background:C.hb,padding:"20px 18px 16px",color:"#fff"}},
+e('div',{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
 e('div',{style:{fontSize:10,fontWeight:700,letterSpacing:2.5,textTransform:"uppercase",opacity:0.4}},"Rezije Izracun"),
+e('div',{style:{fontSize:10,display:"flex",alignItems:"center",opacity:0.7}},
+e('span',{className:"sync-dot",style:{background:connected?"#2ECC71":"#E74C3C"}}),
+connected?"Povezano":"Offline")),
 e('div',{style:{display:"flex",alignItems:"baseline",gap:10,marginTop:4}},
 e('div',{style:{fontSize:24,fontWeight:800,fontFamily:"'Playfair Display',Georgia,serif"}},person==="dubravko"?"Dubravko":"Jadranko"),
 stats.total>0?e('div',{style:{fontSize:14,color:C.ha,fontWeight:700}},fmt(stats.total)):null),
@@ -273,12 +312,12 @@ e('span',null,"Ukupno fiksni/mj"),e('span',{style:{color:C.bl}},fmt(par.voda+par
 e('button',{onClick:resetAll,style:{width:"100%",background:"none",border:"1.5px solid #e74c3c",color:"#e74c3c",borderRadius:10,padding:12,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'Merriweather Sans'",marginTop:12}},"Vrati na pocetne podatke")
 ):null),
 
+// Nav
 e('div',{style:{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:600,background:C.cd,borderTop:"1px solid "+C.bo,display:"flex",padding:"6px 0 10px",zIndex:50,boxShadow:"0 -4px 16px rgba(0,0,0,0.06)"}},
 nav.map(function(n){return e('button',{key:n.id,onClick:function(){setView(n.id)},style:{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,padding:"5px 0",background:"none",border:"none",cursor:"pointer",color:view===n.id?C.ac:C.mu,fontFamily:"'Merriweather Sans'"}},
 e('span',{style:{fontSize:18}},n.i),e('span',{style:{fontSize:10,fontWeight:view===n.id?800:500}},n.l))})));}
 
 ReactDOM.createRoot(document.getElementById('root')).render(e(App));
-})();
 </script>
 </body>
 </html>
