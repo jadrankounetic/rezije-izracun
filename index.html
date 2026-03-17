@@ -52,16 +52,19 @@ ue(function(){fbG().then(function(v){if(v&&v.entries){setData(v);sC(true)}else{f
 ue(function(){if(!data)return;var iv=setInterval(function(){fbG().then(function(v){if(v&&v.entries){setData(v);sC(true);try{localStorage.setItem("rz-bk",JSON.stringify(v))}catch(x){}}}).catch(function(){sC(false)})},5000);return function(){clearInterval(iv)}},[!!data]);
 
 function sv(nd){setData(nd);fbS(nd);sC(true);try{localStorage.setItem("rz-bk",JSON.stringify(nd))}catch(x){}}
+
+var ent=data?data.entries[per]||[]:[];
+var par=data?data.params[per]||defP.dubravko:defP.dubravko;
+var res=um(function(){return calc(ent,par)},[ent,par]);
+var st=um(function(){if(!res.length)return{};var t=0,p=0,s=0;for(var i=0;i<res.length;i++){t+=res[i].uk;p+=res[i].pt;s+=res[i].st}return{total:t,avg:t/res.length,plin:p,struja:s}},[res]);
+
 if(ld||!data)return e('div',{style:{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"100vh",gap:12}},e('div',{style:{width:28,height:28,border:"3px solid #DDD8CF",borderTopColor:"#C0392B",borderRadius:"50%",animation:"sp .7s linear infinite"}}),e('div',{style:{fontSize:13,color:"#7F8C8D"}},"Spajanje..."));
 
-var ent=data.entries[per]||[],par=data.params[per]||defP.dubravko;
-var res=um(function(){return calc(ent,par)},[ent,par]);
 var setE=function(fn){var ne={};for(var k in data.entries)ne[k]=data.entries[k];ne[per]=fn(data.entries[per]);sv({entries:ne,params:data.params})};
 var setPr=function(k,v){var np={};for(var x in data.params)np[x]=data.params[x];var pp={};for(var y in data.params[per])pp[y]=data.params[per][y];pp[k]=v;np[per]=pp;sv({entries:data.entries,params:np})};
 function addR(){if(!nr.d||!nr.m||!nr.k){showT("Popunite sva polja!");return}setE(function(a){return a.concat({id:Date.now(),d:nr.d,m:parseFloat(nr.m),k:parseFloat(nr.k)})});sN({d:"",m:"",k:""});showT("Dodano \u2713")}
 function delR(id){setE(function(a){return a.filter(function(x){return x.id!==id})});showT("Obrisano")}
 function rst(){if(window.confirm("Vratiti na pocetne podatke?")){sv(defD);showT("Resetirano")}}
-var st=um(function(){if(!res.length)return{};var t=0,p=0,s=0;for(var i=0;i<res.length;i++){t+=res[i].uk;p+=res[i].pt;s+=res[i].st}return{total:t,avg:t/res.length,plin:p,struja:s}},[res]);
 var bD=res.map(function(r){return{label:r.date,plin:f2(r.pt),struja:f2(r.st),fix:f2(r.fx)}});
 var lD=res.map(function(r){return{label:r.date,value:f2(r.uk)}});
 var nv=[{id:"tablica",l:"Tablica",i:"\u25A6"},{id:"unos",l:"Unos",i:"\u271A"},{id:"grafovi",l:"Grafovi",i:"\u25C9"},{id:"cijene",l:"Cijene",i:"\u2699"}];
