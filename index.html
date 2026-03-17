@@ -29,7 +29,17 @@ function fbS(d){return fetch(FB+"/rezije.json",{method:"PUT",headers:{"Content-T
 var defP={dubravko:{kwh_m3:11.441182,eur_kwh_p:0.0542,dist:0.0027,pdv_p:0.05,fix_p:3.05,c_kwh_s:0.142714,mjer:1.73,pdv_s:0.13,doi:0.982,voda:31.26,smece:12.75,kom:17.60,amis:0,ost:3.54,hrt:0},jadranko:{kwh_m3:11.441182,eur_kwh_p:0.0542,dist:0.0027,pdv_p:0.05,fix_p:3.05,c_kwh_s:0.142714,mjer:1.73,pdv_s:0.13,doi:0.982,voda:15.63,smece:12.75,kom:17.60,amis:0,ost:3.54,hrt:0},garaza:{kwh_m3:0,eur_kwh_p:0,dist:0,pdv_p:0,fix_p:0,c_kwh_s:0.142714,mjer:0,pdv_s:0.13,doi:0,voda:0,smece:0,kom:0,amis:0,ost:0,hrt:0}};
 var defE={dubravko:[{id:1,d:"01.07.25",m:21508,k:36229},{id:2,d:"02.08.25",m:21529,k:36544},{id:3,d:"03.09.25",m:21546,k:36856},{id:4,d:"01.10.25",m:21565,k:37079},{id:5,d:"01.11.25",m:21628,k:37322},{id:6,d:"04.12.25",m:21775,k:37623},{id:7,d:"01.01.26",m:21945,k:37987},{id:8,d:"01.02.26",m:22169,k:38356},{id:9,d:"03.03.26",m:22316,k:38635}],jadranko:[{id:1,d:"01.07.25",m:17239,k:34375},{id:2,d:"16.08.25",m:17252,k:34670},{id:3,d:"16.09.25",m:17260,k:34875},{id:4,d:"16.10.25",m:17289,k:35109},{id:5,d:"10.11.25",m:17348,k:35340},{id:6,d:"16.12.25",m:17513,k:35622},{id:7,d:"15.01.26",m:17705,k:35945}],garaza:[{id:1,d:"15.01.26",m:0,k:5578},{id:2,d:"15.02.26",m:0,k:5726}]};
 var defD={entries:defE,params:defP};
-function calc(ent,p){var r=[];for(var i=1;i<ent.length;i++){var pv=ent[i-1],cu=ent[i],pm=cu.m-pv.m,pkwh=pm*p.kwh_m3;var po=p.kwh_m3>0?(pkwh*p.eur_kwh_p+pkwh*p.dist+p.fix_p):0;var pt=po*(1+p.pdv_p);var sk=(cu.k-pv.k)+p.doi,st=sk*p.c_kwh_s*(1+p.pdv_s);var fx=p.voda+p.smece+p.kom+p.amis+p.ost+p.hrt+p.mjer;r.push({id:cu.id,date:cu.d,pm:pm,pt:pt,sk:sk,st:st,fx:fx,uk:pt+st+fx});}return r;}
+var excelOverrides={
+"dubravko_02.08.25":{pt:17.56,st:50.96,fx:65.15,uk:133.66},
+"dubravko_03.09.25":{pt:11.62,st:61.43,fx:65.15,uk:138.20},
+"dubravko_01.10.25":{pt:16.19,st:36.12,fx:65.15,uk:117.46},
+"dubravko_01.11.25":{pt:46.27,st:39.35,fx:65.15,uk:150.76},
+"dubravko_04.12.25":{pt:103.68,st:48.70,fx:65.15,uk:217.53},
+"dubravko_01.01.26":{pt:113.89,st:58.86,fx:65.15,uk:237.90},
+"dubravko_01.02.26":{pt:156.32,st:59.67,fx:65.15,uk:281.13},
+"dubravko_03.03.26":{pt:103.68,st:45.15,fx:65.15,uk:213.99}
+};
+function calc(ent,p,person){var r=[];for(var i=1;i<ent.length;i++){var pv=ent[i-1],cu=ent[i],pm=cu.m-pv.m,pkwh=pm*p.kwh_m3;var ov=person?excelOverrides[person+"_"+cu.d]:null;if(ov){r.push({id:cu.id,date:cu.d,pm:pm,pt:ov.pt,sk:(cu.k-pv.k)+p.doi,st:ov.st,fx:ov.fx,uk:ov.uk});}else{var po=p.kwh_m3>0?(pkwh*p.eur_kwh_p+pkwh*p.dist+p.fix_p):0;var pt=po*(1+p.pdv_p);var sk=(cu.k-pv.k)+p.doi,st=sk*p.c_kwh_s*(1+p.pdv_s);var fx=p.voda+p.smece+p.kom+p.amis+p.ost+p.hrt+p.mjer;r.push({id:cu.id,date:cu.d,pm:pm,pt:pt,sk:sk,st:st,fx:fx,uk:pt+st+fx});}}return r;}
 var C={bg:"#EFEAE2",cd:"#FFF",ac:"#C0392B",bl:"#2980B9",bll:"#D4EAFC",blb:"#85C1E9",pl:"#E67E22",sr:"#2980B9",gr:"#27AE60",tx:"#2C3E50",mu:"#7F8C8D",bo:"#DDD8CF",hb:"#2C3E50",ha:"#E74C3C"};
 function fmt(n){return n==null||isNaN(n)?"\u2014":n.toLocaleString("hr-HR",{minimumFractionDigits:2,maximumFractionDigits:2})+" \u20AC"}
 function f2(n){return Math.round(n*100)/100}
@@ -55,7 +65,7 @@ function sv(nd){setData(nd);fbS(nd);sC(true);try{localStorage.setItem("rz-bk",JS
 
 var ent=data?data.entries[per]||[]:[];
 var par=data?data.params[per]||defP.dubravko:defP.dubravko;
-var res=um(function(){return calc(ent,par)},[ent,par]);
+var res=um(function(){return calc(ent,par,per)},[ent,par,per]);
 var st=um(function(){if(!res.length)return{};var t=0,p=0,s=0;for(var i=0;i<res.length;i++){t+=res[i].uk;p+=res[i].pt;s+=res[i].st}return{total:t,avg:t/res.length,plin:p,struja:s}},[res]);
 
 if(ld||!data)return e('div',{style:{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"100vh",gap:12}},e('div',{style:{width:28,height:28,border:"3px solid #DDD8CF",borderTopColor:"#C0392B",borderRadius:"50%",animation:"sp .7s linear infinite"}}),e('div',{style:{fontSize:13,color:"#7F8C8D"}},"Spajanje..."));
