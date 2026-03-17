@@ -72,7 +72,7 @@ if(ld||!data)return e('div',{style:{display:"flex",flexDirection:"column",alignI
 
 var setE=function(fn){var ne={};for(var k in data.entries)ne[k]=data.entries[k];ne[per]=fn(data.entries[per]);sv({entries:ne,params:data.params})};
 var setPr=function(k,v){var np={};for(var x in data.params)np[x]=data.params[x];var pp={};for(var y in data.params[per])pp[y]=data.params[per][y];pp[k]=v;np[per]=pp;sv({entries:data.entries,params:np})};
-function fmtDate(iso){if(!iso)return"";var p=iso.split("-");return p[2]+"."+p[1]+"."+p[0].slice(2)}
+function fmtDate(iso){if(!iso)return"";var p=iso.split("-");return p[2]+"."+p[1]+"."+p[0]+"."}
 function addR(){var isG=per==="garaza";var dd=typeof nr.d==="string"&&nr.d.includes("-")?fmtDate(nr.d):nr.d;if(!dd||!nr.k||((!isG)&&!nr.m)){showT("Popunite sva polja!");return}setE(function(a){return a.concat({id:Date.now(),d:dd,m:isG?0:parseFloat(nr.m),k:parseFloat(nr.k)})});sN({d:"",m:"",k:""});showT("Dodano \u2713")}
 function delR(id){setE(function(a){return a.filter(function(x){return x.id!==id})});showT("Obrisano")}
 function rst(){var pw=window.prompt("Unesite lozinku:");if(pw==="1234"){sv(defD);showT("Resetirano")}else if(pw!==null){showT("Pogresna lozinka!")}}
