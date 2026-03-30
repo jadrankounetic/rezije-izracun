@@ -43,7 +43,7 @@ var excelOverrides={
 "dubravko_01.02.26":{pt:156.32,st:59.67,fx:65.15,uk:281.13},
 "dubravko_03.03.26":{pt:103.68,st:45.15,fx:65.15,uk:213.99}
 };
-function calc(ent,p,person){var r=[];for(var i=1;i<ent.length;i++){var pv=ent[i-1],cu=ent[i],pm=cu.m-pv.m,pkwh=pm*p.kwh_m3;var ov=person?excelOverrides[person+"_"+cu.d]:null;if(ov){r.push({id:cu.id,date:cu.d,pm:pm,pt:ov.pt,sk:(cu.k-pv.k)+p.doi,st:ov.st,fx:ov.fx,uk:ov.uk});}else{var po=p.kwh_m3>0?(pkwh*p.eur_kwh_p+pkwh*p.dist+p.fix_p):0;var pt=po*(1+p.pdv_p);var sk=(cu.k-pv.k)+p.doi,st=sk*p.c_kwh_s*(1+p.pdv_s);var fx=p.voda+p.smece+p.kom+p.amis+p.ost+p.hrt+p.mjer;r.push({id:cu.id,date:cu.d,pm:pm,pt:pt,sk:sk,st:st,fx:fx,uk:pt+st+fx});}}return r;}
+function calc(ent,p,person){var r=[];for(var i=1;i<ent.length;i++){var pv=ent[i-1],cu=ent[i],pm=cu.m-pv.m;var ov=person?excelOverrides[person+"_"+cu.d]:null;if(ov){r.push({id:cu.id,date:cu.d,pm:pm,pt:ov.pt,sk:(cu.k-pv.k)+(p.doi||0),st:ov.st,fx:ov.fx,uk:ov.uk});}else{var cp=cu.p||p;var pkwh=pm*cp.kwh_m3;var po=cp.kwh_m3>0?(pkwh*cp.eur_kwh_p+pkwh*cp.dist+cp.fix_p):0;var pt=po*(1+cp.pdv_p);var sk=(cu.k-pv.k)+cp.doi,st=sk*cp.c_kwh_s*(1+cp.pdv_s);var fx=cp.voda+cp.smece+cp.kom+cp.amis+cp.ost+cp.hrt+cp.mjer;r.push({id:cu.id,date:cu.d,pm:pm,pt:pt,sk:sk,st:st,fx:fx,uk:pt+st+fx});}}return r;}
 var C={bg:"#EFEAE2",cd:"#FFF",ac:"#C0392B",bl:"#2980B9",bll:"#D4EAFC",blb:"#85C1E9",pl:"#E67E22",sr:"#2980B9",gr:"#27AE60",tx:"#2C3E50",mu:"#7F8C8D",bo:"#DDD8CF",hb:"#2C3E50",ha:"#E74C3C"};
 function fmt(n){return n==null||isNaN(n)?"\u2014":n.toLocaleString("hr-HR",{minimumFractionDigits:2,maximumFractionDigits:2})+" \u20AC"}
 function f2(n){return Math.round(n*100)/100}
@@ -83,7 +83,7 @@ if(ld||!data)return e('div',{style:{display:"flex",flexDirection:"column",alignI
 var setE=function(fn){var ne={};for(var k in data.entries)ne[k]=data.entries[k];ne[per]=fn(data.entries[per]);sv({entries:ne,params:data.params})};
 var setPr=function(k,v){var np={};for(var x in data.params)np[x]=data.params[x];var pp={};for(var y in data.params[per])pp[y]=data.params[per][y];pp[k]=v;np[per]=pp;sv({entries:data.entries,params:np})};
 function fmtDate(iso){if(!iso)return"";var p=iso.split("-");return p[2]+"."+p[1]+"."+p[0]+"."}
-function addR(){var isG=per==="garaza";var dd=nr.dd&&nr.mm&&nr.yy?nr.dd+"."+nr.mm+"."+nr.yy+".":"";if(!dd||!nr.k||((!isG)&&!nr.m)){showT("Popunite sva polja!");return}setE(function(a){return a.concat({id:Date.now(),d:dd,m:isG?0:parseFloat(nr.m),k:parseFloat(nr.k)})});sN({d:"",m:"",k:"",dd:"",mm:"",yy:""});showT("Dodano \u2713")}
+function addR(){var isG=per==="garaza";var dd=nr.dd&&nr.mm&&nr.yy?nr.dd+"."+nr.mm+"."+nr.yy+".":"";if(!dd||!nr.k||((!isG)&&!nr.m)){showT("Popunite sva polja!");return}var snap={};for(var pk in par)snap[pk]=par[pk];setE(function(a){return a.concat({id:Date.now(),d:dd,m:isG?0:parseFloat(nr.m),k:parseFloat(nr.k),p:snap})});sN({d:"",m:"",k:"",dd:"",mm:"",yy:""});showT("Dodano \u2713")}
 function delR(id){setE(function(a){return a.filter(function(x){return x.id!==id})});showT("Obrisano")}
 function rst(){var pw=window.prompt("Unesite lozinku:");if(pw==="1234"){sv(defD);showT("Resetirano")}else if(pw!==null){showT("Pogresna lozinka!")}}
 var bD=res.map(function(r){return{label:r.date,plin:f2(r.pt),struja:f2(r.st),fix:f2(r.fx)}});
