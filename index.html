@@ -84,7 +84,7 @@ var setE=function(fn){var ne={};for(var k in data.entries)ne[k]=data.entries[k];
 var setPr=function(k,v){var np={};for(var x in data.params)np[x]=data.params[x];var pp={};for(var y in data.params[per])pp[y]=data.params[per][y];pp[k]=v;np[per]=pp;sv({entries:data.entries,params:np})};
 function fmtDate(iso){if(!iso)return"";var p=iso.split("-");return p[2]+"."+p[1]+"."+p[0]+"."}
 function addR(){var isG=per==="garaza";var dd=nr.dd&&nr.mm&&nr.yy?nr.dd+"."+nr.mm+"."+nr.yy+".":"";if(!dd||!nr.k||((!isG)&&!nr.m)){showT("Popunite sva polja!");return}var snap={};for(var pk in par)snap[pk]=par[pk];setE(function(a){return a.concat({id:Date.now(),d:dd,m:isG?0:parseFloat(nr.m),k:parseFloat(nr.k),p:snap})});sN({d:"",m:"",k:"",dd:"",mm:"",yy:""});showT("Dodano \u2713")}
-function delR(id){setE(function(a){return a.filter(function(x){return x.id!==id})});showT("Obrisano")}
+function delR(id){if(window.confirm("Stvarno zelite obrisat unos?")){setE(function(a){return a.filter(function(x){return x.id!==id})});showT("Obrisano")}}
 function rst(){var pw=window.prompt("Unesite lozinku:");if(pw==="1234"){sv(defD);showT("Resetirano")}else if(pw!==null){showT("Pogresna lozinka!")}}
 var bD=res.map(function(r){return{label:r.date,plin:f2(r.pt),struja:f2(r.st),fix:f2(r.fx)}});
 var lD=res.map(function(r){return{label:r.date,value:f2(r.uk)}});
