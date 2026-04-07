@@ -31,7 +31,19 @@ var AUTH=urlKey===SECRET;
 function fbG(){if(!AUTH)return Promise.resolve(null);return fetch(FB+"/rezije.json?auth="+SECRET).then(function(r){return r.json()}).catch(function(){return null})}
 function fbS(d){if(!AUTH)return;return fetch(FB+"/rezije.json?auth="+SECRET,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}).catch(function(){})}
 var defP={dubravko:{kwh_m3:11.441182,eur_kwh_p:0.0542,dist:0.0027,pdv_p:0.05,fix_p:3.05,c_kwh_s:0.142714,mjer:1.73,pdv_s:0.13,doi:0.982,voda:31.26,smece:12.75,kom:17.60,amis:0,ost:3.54,hrt:0},jadranko:{kwh_m3:11.441182,eur_kwh_p:0.0542,dist:0.0027,pdv_p:0.05,fix_p:3.05,c_kwh_s:0.142714,mjer:1.73,pdv_s:0.13,doi:0.982,voda:15.63,smece:12.75,kom:17.60,amis:0,ost:3.54,hrt:0},garaza:{kwh_m3:0,eur_kwh_p:0,dist:0,pdv_p:0,fix_p:0,c_kwh_s:0.142714,mjer:0,pdv_s:0.13,doi:0,voda:0,smece:0,kom:0,amis:0,ost:0,hrt:0}};
-var defE={dubravko:[{id:1,d:"01.07.25",m:21508,k:36229},{id:2,d:"02.08.25",m:21529,k:36544},{id:3,d:"03.09.25",m:21546,k:36856},{id:4,d:"01.10.25",m:21565,k:37079},{id:5,d:"01.11.25",m:21628,k:37322},{id:6,d:"04.12.25",m:21775,k:37623},{id:7,d:"01.01.26",m:21945,k:37987},{id:8,d:"01.02.26",m:22169,k:38356},{id:9,d:"03.03.26",m:22316,k:38635}],jadranko:[{id:1,d:"01.07.25",m:17239,k:34375},{id:2,d:"16.08.25",m:17252,k:34670},{id:3,d:"16.09.25",m:17260,k:34875},{id:4,d:"16.10.25",m:17289,k:35109},{id:5,d:"10.11.25",m:17348,k:35340},{id:6,d:"16.12.25",m:17513,k:35622},{id:7,d:"15.01.26",m:17705,k:35945}],garaza:[{id:1,d:"15.01.26",m:0,k:5578},{id:2,d:"15.02.26",m:0,k:5726}]};
+var defE={dubravko:[
+{id:1,d:"01.07.25",m:21508,k:36229},{id:2,d:"02.08.25",m:21529,k:36544},
+{id:3,d:"03.09.25",m:21546,k:36856},{id:4,d:"01.10.25",m:21565,k:37079},
+{id:5,d:"01.11.25",m:21628,k:37322},{id:6,d:"04.12.25",m:21775,k:37623},
+{id:7,d:"01.01.2026",m:21945,k:37987},{id:8,d:"01.02.2026",m:22169,k:38356},
+{id:9,d:"03.03.2026",m:22316,k:38635},{id:10,d:"01.04.2026",m:22414,k:38885}
+],jadranko:[
+{id:1,d:"01.07.25",m:17239,k:34375},{id:2,d:"16.08.25",m:17252,k:34670},
+{id:3,d:"16.09.25",m:17260,k:34875},{id:4,d:"16.10.2025",m:17289,k:35109},
+{id:5,d:"10.11.2025",m:17348,k:35340},{id:6,d:"16.12.2025",m:17513,k:35622},
+{id:7,d:"15.01.2026",m:17705,k:35945},{id:8,d:"15.02.2026",m:17891,k:36259},
+{id:9,d:"15.03.2026",m:18000,k:36497}
+],garaza:[{id:1,d:"15.01.26",m:0,k:5578},{id:2,d:"15.02.26",m:0,k:5726}]};
 var defD={entries:defE,params:defP};
 var excelOverrides={
 "dubravko_02.08.25":{pt:17.56,st:50.96,fx:65.15,uk:133.66},
@@ -39,10 +51,18 @@ var excelOverrides={
 "dubravko_01.10.25":{pt:16.19,st:36.12,fx:65.15,uk:117.46},
 "dubravko_01.11.25":{pt:46.27,st:39.35,fx:65.15,uk:150.76},
 "dubravko_04.12.25":{pt:103.68,st:48.70,fx:65.15,uk:217.53},
-"dubravko_01.01.26":{pt:113.89,st:58.86,fx:65.15,uk:237.90},
-"dubravko_01.02.26":{pt:156.32,st:59.67,fx:65.15,uk:281.13},
-"dubravko_03.03.26":{pt:103.68,st:45.15,fx:65.15,uk:213.99},
-"dubravko_01.04.2026":{pt:70.19,st:40.48,fx:65.15,uk:175.82}
+"dubravko_01.01.2026":{pt:113.89,st:58.86,fx:65.15,uk:237.90},
+"dubravko_01.02.2026":{pt:156.32,st:59.67,fx:65.15,uk:281.13},
+"dubravko_03.03.2026":{pt:103.68,st:45.15,fx:65.15,uk:213.99},
+"dubravko_01.04.2026":{pt:70.19,st:40.48,fx:65.15,uk:175.82},
+"jadranko_16.08.25":{pt:12.51,st:47.73,fx:49.52,uk:109.76},
+"jadranko_16.09.25":{pt:8.67,st:33.22,fx:49.52,uk:91.41},
+"jadranko_16.10.2025":{pt:23.03,st:37.89,fx:49.52,uk:110.44},
+"jadranko_10.11.2025":{pt:43.53,st:37.41,fx:51.25,uk:132.19},
+"jadranko_16.12.2025":{pt:115.99,st:45.64,fx:51.25,uk:212.87},
+"jadranko_15.01.2026":{pt:134.44,st:52.25,fx:51.25,uk:237.94},
+"jadranko_15.02.2026":{pt:130.34,st:50.80,fx:51.25,uk:232.39},
+"jadranko_15.03.2026":{pt:77.71,st:38.54,fx:51.25,uk:167.50}
 };
 function calc(ent,p,person){var r=[];for(var i=1;i<ent.length;i++){var pv=ent[i-1],cu=ent[i],pm=cu.m-pv.m;var dk=cu.d.replace(/\.$/,"");var ov=person?excelOverrides[person+"_"+dk]:null;if(ov){r.push({id:cu.id,date:cu.d,pm:pm,pt:ov.pt,sk:(cu.k-pv.k)+(p.doi||0),st:ov.st,fx:ov.fx,uk:ov.uk});}else{var cp=cu.p||p;var pkwh=pm*cp.kwh_m3;var po=cp.kwh_m3>0?(pkwh*cp.eur_kwh_p+pkwh*cp.dist+cp.fix_p):0;var pt=po*(1+cp.pdv_p);var sk=(cu.k-pv.k)+cp.doi,st=sk*cp.c_kwh_s*(1+cp.pdv_s);var fx=cp.voda+cp.smece+cp.kom+cp.amis+cp.ost+cp.hrt;r.push({id:cu.id,date:cu.d,pm:pm,pt:pt,sk:sk,st:st,fx:fx,uk:pt+st+fx});}}return r;}
 var C={bg:"#EFEAE2",cd:"#FFF",ac:"#C0392B",bl:"#2980B9",bll:"#D4EAFC",blb:"#85C1E9",pl:"#E67E22",sr:"#2980B9",gr:"#27AE60",tx:"#2C3E50",mu:"#7F8C8D",bo:"#DDD8CF",hb:"#2C3E50",ha:"#E74C3C"};
