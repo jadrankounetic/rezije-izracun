@@ -41,7 +41,8 @@ var excelOverrides={
 "dubravko_04.12.25":{pt:103.68,st:48.70,fx:65.15,uk:217.53},
 "dubravko_01.01.26":{pt:113.89,st:58.86,fx:65.15,uk:237.90},
 "dubravko_01.02.26":{pt:156.32,st:59.67,fx:65.15,uk:281.13},
-"dubravko_03.03.26":{pt:103.68,st:45.15,fx:65.15,uk:213.99}
+"dubravko_03.03.26":{pt:103.68,st:45.15,fx:65.15,uk:213.99},
+"dubravko_01.04.2026":{pt:70.19,st:40.48,fx:65.15,uk:175.82}
 };
 function calc(ent,p,person){var r=[];for(var i=1;i<ent.length;i++){var pv=ent[i-1],cu=ent[i],pm=cu.m-pv.m;var dk=cu.d.replace(/\.$/,"");var ov=person?excelOverrides[person+"_"+dk]:null;if(ov){r.push({id:cu.id,date:cu.d,pm:pm,pt:ov.pt,sk:(cu.k-pv.k)+(p.doi||0),st:ov.st,fx:ov.fx,uk:ov.uk});}else{var cp=cu.p||p;var pkwh=pm*cp.kwh_m3;var po=cp.kwh_m3>0?(pkwh*cp.eur_kwh_p+pkwh*cp.dist+cp.fix_p):0;var pt=po*(1+cp.pdv_p);var sk=(cu.k-pv.k)+cp.doi,st=sk*cp.c_kwh_s*(1+cp.pdv_s);var fx=cp.voda+cp.smece+cp.kom+cp.amis+cp.ost+cp.hrt;r.push({id:cu.id,date:cu.d,pm:pm,pt:pt,sk:sk,st:st,fx:fx,uk:pt+st+fx});}}return r;}
 var C={bg:"#EFEAE2",cd:"#FFF",ac:"#C0392B",bl:"#2980B9",bll:"#D4EAFC",blb:"#85C1E9",pl:"#E67E22",sr:"#2980B9",gr:"#27AE60",tx:"#2C3E50",mu:"#7F8C8D",bo:"#DDD8CF",hb:"#2C3E50",ha:"#E74C3C"};
