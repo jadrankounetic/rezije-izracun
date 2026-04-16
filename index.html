@@ -36,7 +36,8 @@ function getFixPerson(sh,person){
 if(person==="garaza")return 0;
 var v=person==="dubravko"?sh.voda*0.5:sh.voda*0.25;
 var s=sh.smece/3;
-return v+s+sh.kom+(sh.amis||0)+(sh.ost||0);
+var o=(sh.hrt||0)/3+(sh.ost||0);
+return v+s+sh.kom+(sh.amis||0)+o;
 }
 var defE={dubravko:[
 {id:1,d:"01.07.25",m:21508,k:36229},{id:2,d:"02.08.25",m:21529,k:36544},
@@ -143,8 +144,8 @@ e('div',{style:{fontSize:10,color:C.mu,paddingLeft:4,marginBottom:4}},"Isto za o
 e(PF,{label:"AMIS",value:sh.amis,onChange:function(v){setSh("amis",v)},unit:"\u20AC"}),
 e(PF,{label:"Ostalo",value:sh.ost,onChange:function(v){setSh("ost",v)},unit:"\u20AC"}),
 e('div',{style:{borderTop:"1px dashed "+C.blb,marginTop:8,paddingTop:8}}),
-e(PF,{label:"HRT (nije u ukupno)",value:sh.hrt,onChange:function(v){setSh("hrt",v)},unit:"\u20AC"}),
-e('div',{style:{fontSize:10,color:C.mu,paddingLeft:4,marginBottom:4}},"HRT se NE uracunava u ukupan iznos"),
+e(PF,{label:"HRT (ukupno)",value:sh.hrt,onChange:function(v){setSh("hrt",v)},unit:"\u20AC"}),
+e('div',{style:{fontSize:10,color:C.mu,paddingLeft:4,marginBottom:4}},"HRT/3 ide u ukupno kao 'ostalo'"),
 e('div',{style:{borderTop:"1px solid "+C.blb,marginTop:8,paddingTop:8}},
 e('div',{style:{display:"flex",justifyContent:"space-between",fontWeight:800,fontSize:13,marginBottom:4}},e('span',null,"Dubravko fiksni/mj"),e('span',{style:{color:C.bl}},fmt(getFixPerson(sh,"dubravko")))),
 e('div',{style:{display:"flex",justifyContent:"space-between",fontWeight:800,fontSize:13}},e('span',null,"Jadranko fiksni/mj"),e('span',{style:{color:C.bl}},fmt(getFixPerson(sh,"jadranko")))))),
