@@ -31,26 +31,24 @@ var AUTH=urlKey===SECRET;
 function fbG(){if(!AUTH)return Promise.resolve(null);return fetch(FB+"/rezije.json?auth="+SECRET).then(function(r){return r.json()}).catch(function(){return null})}
 function fbS(d){if(!AUTH)return;return fetch(FB+"/rezije.json?auth="+SECRET,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(d)}).catch(function(){})}
 var defP={dubravko:{kwh_m3:11.441182,eur_kwh_p:0.0542,dist:0.0027,pdv_p:0.05,fix_p:3.05,c_kwh_s:0.142714,mjer:1.73,pdv_s:0.13,doi:0.982},jadranko:{kwh_m3:11.441182,eur_kwh_p:0.0542,dist:0.0027,pdv_p:0.05,fix_p:3.05,c_kwh_s:0.142714,mjer:1.73,pdv_s:0.13,doi:0.982},garaza:{kwh_m3:0,eur_kwh_p:0,dist:0,pdv_p:0,fix_p:0,c_kwh_s:0.142714,mjer:0,pdv_s:0.13,doi:0}};
-var defShared={voda:62.52,smece:38.25,kom:17.60,amis:0,hrt:10.62,ost:0};
+var defShared={voda:64.58,smece:27.50,kom:0,amis:0,hrt:10.62,ost:0};
 function getFixPerson(sh,person){
 if(person==="garaza")return 0;
-var v=person==="dubravko"?sh.voda*0.5:sh.voda*0.25;
-var s=sh.smece/3;
-var o=(sh.hrt||0)/3+(sh.ost||0);
-return v+s+sh.kom+(sh.amis||0)+o;
+return (sh.voda||0)+(sh.smece||0)+(sh.kom||0)+(sh.amis||0)+((sh.hrt||0)/3)+(sh.ost||0);
 }
 var defE={dubravko:[
 {id:1,d:"01.07.25",m:21508,k:36229},{id:2,d:"02.08.25",m:21529,k:36544},
 {id:3,d:"03.09.25",m:21546,k:36856},{id:4,d:"01.10.25",m:21565,k:37079},
 {id:5,d:"01.11.25",m:21628,k:37322},{id:6,d:"04.12.25",m:21775,k:37623},
 {id:7,d:"01.01.2026",m:21945,k:37987},{id:8,d:"01.02.2026",m:22169,k:38356},
-{id:9,d:"03.03.2026",m:22316,k:38635},{id:10,d:"01.04.2026",m:22414,k:38885}
+{id:9,d:"03.03.2026",m:22316,k:38635},{id:10,d:"01.04.2026",m:22414,k:38885},{id:11,d:"01.05.2026.",m:22460,k:39054}
 ],jadranko:[
 {id:1,d:"01.07.25",m:17239,k:34375},{id:2,d:"16.08.25",m:17252,k:34670},
 {id:3,d:"16.09.25",m:17260,k:34875},{id:4,d:"16.10.2025",m:17289,k:35109},
 {id:5,d:"10.11.2025",m:17348,k:35340},{id:6,d:"16.12.2025",m:17513,k:35622},
 {id:7,d:"15.01.2026",m:17705,k:35945},{id:8,d:"15.02.2026",m:17891,k:36259},
-{id:9,d:"15.03.2026",m:18000,k:36497}
+{id:9,d:"15.03.2026",m:18000,k:36497},{id:10,d:"16.04.2026",m:18088,k:36752},
+{id:11,d:"17.05.2026.",m:18115,k:37042}
 ],garaza:[{id:1,d:"15.01.26",m:0,k:5578},{id:2,d:"15.02.26",m:0,k:5726}]};
 var defD={entries:defE,params:defP,shared:defShared};
 var excelOverrides={
@@ -63,6 +61,7 @@ var excelOverrides={
 "dubravko_01.02.2026":{pt:156.32,st:59.67,fx:65.15,uk:281.13},
 "dubravko_03.03.2026":{pt:103.68,st:45.15,fx:65.15,uk:213.99},
 "dubravko_01.04.2026":{pt:70.19,st:40.48,fx:65.15,uk:175.82},
+"dubravko_01.05.2026":{pt:34.65,st:27.41,fx:95.62,uk:157.68},
 "jadranko_16.08.25":{pt:12.51,st:47.73,fx:49.52,uk:109.76},
 "jadranko_16.09.25":{pt:8.67,st:33.22,fx:49.52,uk:91.41},
 "jadranko_16.10.2025":{pt:23.03,st:37.89,fx:49.52,uk:110.44},
@@ -71,7 +70,8 @@ var excelOverrides={
 "jadranko_15.01.2026":{pt:134.44,st:52.25,fx:51.25,uk:237.94},
 "jadranko_15.02.2026":{pt:130.34,st:50.80,fx:51.25,uk:232.39},
 "jadranko_15.03.2026":{pt:77.71,st:38.54,fx:51.25,uk:167.50},
-"jadranko_16.04.2026":{pt:63.36,st:41.28,fx:51.25,uk:155.89}
+"jadranko_16.04.2026":{pt:63.36,st:41.28,fx:51.25,uk:155.89},
+"jadranko_17.05.2026":{pt:21.66,st:46.93,fx:97.35,uk:165.93}
 };
 function calc(ent,p,person,sh){var r=[];for(var i=1;i<ent.length;i++){var pv=ent[i-1],cu=ent[i],pm=cu.m-pv.m;var dk=cu.d.replace(/\.$/,"");var ov=person?excelOverrides[person+"_"+dk]:null;if(ov){r.push({id:cu.id,date:cu.d,pm:pm,pt:ov.pt,sk:(cu.k-pv.k)+(p.doi||0),st:ov.st,fx:ov.fx,uk:ov.uk});}else{var cp=cu.p||p;var csh=cu.sh||sh;var pkwh=pm*cp.kwh_m3;var po=cp.kwh_m3>0?(pkwh*cp.eur_kwh_p+pkwh*cp.dist+cp.fix_p):0;var pt=po*(1+cp.pdv_p);var sk=(cu.k-pv.k)+cp.doi,st=sk*cp.c_kwh_s*(1+cp.pdv_s);var fx=getFixPerson(csh,person);r.push({id:cu.id,date:cu.d,pm:pm,pt:pt,sk:sk,st:st,fx:fx,uk:pt+st+fx});}}return r;}
 var C={bg:"#EFEAE2",cd:"#FFF",ac:"#C0392B",bl:"#2980B9",bll:"#D4EAFC",blb:"#85C1E9",pl:"#E67E22",sr:"#2980B9",gr:"#27AE60",tx:"#2C3E50",mu:"#7F8C8D",bo:"#DDD8CF",hb:"#2C3E50",ha:"#E74C3C"};
@@ -136,20 +136,16 @@ vw==="unos"?e('div',null,e('div',{style:{fontSize:20,fontWeight:800,fontFamily:"
 vw==="grafovi"?e('div',null,e('div',{style:{fontSize:20,fontWeight:800,fontFamily:"'Playfair Display',serif",marginBottom:16}},"Grafovi"),bD.length?e('div',null,e('div',{style:{background:C.cd,borderRadius:12,padding:16,border:"1px solid "+C.bo,marginBottom:16}},e('div',{style:{fontSize:12,fontWeight:700,marginBottom:10}},"Struktura troskova"),e(SvgBar,{data:bD})),e('div',{style:{background:C.cd,borderRadius:12,padding:16,border:"1px solid "+C.bo}},e('div',{style:{fontSize:12,fontWeight:700,marginBottom:10}},"Trend ukupno"),e(SvgLine,{data:lD}))):e('div',{style:{textAlign:"center",padding:40,color:C.mu}},"Nema podataka")):null,
 vw==="cijene"?e('div',null,e('div',{style:{fontSize:20,fontWeight:800,fontFamily:"'Playfair Display',serif",marginBottom:4}},"Cijene i parametri"),e('div',{style:{fontSize:12,color:C.bl,fontWeight:600,marginBottom:16,display:"flex",alignItems:"center",gap:6}},e('span',{style:{display:"inline-block",width:14,height:14,borderRadius:4,background:C.bll,border:"1.5px solid "+C.blb}}),"Plava polja - mijenjaju se pri promjeni cijena"),
 e(PS,{title:"Zajednicki fiksni izdaci",icon:"\uD83C\uDFE0"},
-e(PF,{label:"Voda (ukupno)",value:sh.voda,onChange:function(v){setSh("voda",v)},unit:"\u20AC"}),
-e('div',{style:{fontSize:10,color:C.mu,paddingLeft:4,marginBottom:4}},"Dubravko: 50% = "+fmt(sh.voda*0.5)+"  |  Jadranko: 25% = "+fmt(sh.voda*0.25)),
-e(PF,{label:"Smece (ukupno)",value:sh.smece,onChange:function(v){setSh("smece",v)},unit:"\u20AC"}),
-e('div',{style:{fontSize:10,color:C.mu,paddingLeft:4,marginBottom:4}},"Dubravko: 33% = "+fmt(sh.smece/3)+"  |  Jadranko: 33% = "+fmt(sh.smece/3)),
+e(PF,{label:"Voda",value:sh.voda,onChange:function(v){setSh("voda",v)},unit:"\u20AC"}),
+e(PF,{label:"Smece",value:sh.smece,onChange:function(v){setSh("smece",v)},unit:"\u20AC"}),
 e(PF,{label:"Komunalije",value:sh.kom,onChange:function(v){setSh("kom",v)},unit:"\u20AC"}),
-e('div',{style:{fontSize:10,color:C.mu,paddingLeft:4,marginBottom:4}},"Isto za oba"),
 e(PF,{label:"AMIS",value:sh.amis,onChange:function(v){setSh("amis",v)},unit:"\u20AC"}),
 e(PF,{label:"Ostalo",value:sh.ost,onChange:function(v){setSh("ost",v)},unit:"\u20AC"}),
 e('div',{style:{borderTop:"1px dashed "+C.blb,marginTop:8,paddingTop:8}}),
 e(PF,{label:"HRT (ukupno)",value:sh.hrt,onChange:function(v){setSh("hrt",v)},unit:"\u20AC"}),
-e('div',{style:{fontSize:10,color:C.mu,paddingLeft:4,marginBottom:4}},"HRT/3 ide u ukupno kao 'ostalo'"),
+e('div',{style:{fontSize:10,color:C.mu,paddingLeft:4,marginBottom:4}},"U ukupno ide HRT/3 = "+fmt((sh.hrt||0)/3)),
 e('div',{style:{borderTop:"1px solid "+C.blb,marginTop:8,paddingTop:8}},
-e('div',{style:{display:"flex",justifyContent:"space-between",fontWeight:800,fontSize:13,marginBottom:4}},e('span',null,"Dubravko fiksni/mj"),e('span',{style:{color:C.bl}},fmt(getFixPerson(sh,"dubravko")))),
-e('div',{style:{display:"flex",justifyContent:"space-between",fontWeight:800,fontSize:13}},e('span',null,"Jadranko fiksni/mj"),e('span',{style:{color:C.bl}},fmt(getFixPerson(sh,"jadranko")))))),
+e('div',{style:{display:"flex",justifyContent:"space-between",fontWeight:800,fontSize:13}},e('span',null,"Fiksni/mj po osobi"),e('span',{style:{color:C.bl}},fmt(getFixPerson(sh,"dubravko")))))),
 per!=="garaza"?e(PS,{title:"Parametri plina",icon:"\uD83D\uDD25"},e(PF,{label:"kWh / m3",value:par.kwh_m3,onChange:function(v){setPr("kwh_m3",v)}}),e(PF,{label:"EUR / kWh",value:par.eur_kwh_p,onChange:function(v){setPr("eur_kwh_p",v)},unit:"\u20AC"}),e(PF,{label:"Distribucija",value:par.dist,onChange:function(v){setPr("dist",v)},unit:"\u20AC"}),e(PF,{label:"PDV plin",value:par.pdv_p,onChange:function(v){setPr("pdv_p",v)}}),e(PF,{label:"Fiksna naknada",value:par.fix_p,onChange:function(v){setPr("fix_p",v)},unit:"\u20AC"})):null,
 e(PS,{title:"Parametri struje",icon:"\u26A1"},e(PF,{label:"Cijena kWh",value:par.c_kwh_s,onChange:function(v){setPr("c_kwh_s",v)},unit:"\u20AC"}),per!=="garaza"?e(PF,{label:"Mjerenje mj.",value:par.mjer,onChange:function(v){setPr("mjer",v)},unit:"\u20AC"}):null,e(PF,{label:"PDV struja",value:par.pdv_s,onChange:function(v){setPr("pdv_s",v)}}),per!=="garaza"?e(PF,{label:"Dodatak OI",value:par.doi,onChange:function(v){setPr("doi",v)},unit:"kWh"}):null),
 e('button',{onClick:rst,style:{width:"100%",background:"none",border:"1.5px solid #e74c3c",color:"#e74c3c",borderRadius:10,padding:12,fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'Merriweather Sans'",marginTop:12}},"Vrati na pocetne podatke")):null),
